@@ -907,12 +907,18 @@ func (r *Runtime) Interrupt(v interface{}) {
 	r.vm.Interrupt(v)
 }
 
+func (r *Runtime) CreateFunctionProxy(call func(FunctionCall) Value, construct func([]Value) *Object) Value {
+	return r.newNativeFunc(call, construct, "", nil, 0)
+}
+
 /*
 ToValue converts a Go value into JavaScript value.
 
 Primitive types (ints and uints, floats, string, bool) are converted to the corresponding JavaScript primitives.
 
 func(FunctionCall) Value is treated as a native JavaScript function.
+
+func(ConstructorCall) *Object is treated as a proxy interceptor call for a constructor. Useful to implement the ECMA6 Proxy pattern
 
 map[string]interface{} is converted into a host object that largely behaves like a JavaScript Object.
 
@@ -951,6 +957,8 @@ func (r *Runtime) ToValue(i interface{}) Value {
 		return r.newNativeFunc(i, nil, "", nil, 0)
 	case func(ConstructorCall) *Object:
 		return r.newNativeConstructor(i, "", 0)
+	case func([]Value) *Object:
+		return r.newNativeFunc(nil, i, "", nil, 0)
 	case int:
 		return intToValue(int64(i))
 	case int8:
