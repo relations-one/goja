@@ -1,7 +1,6 @@
 package parser
 
 import (
-
 	"github.com/dop251/goja/ast"
 	"github.com/dop251/goja/file"
 	"github.com/dop251/goja/token"
@@ -247,6 +246,9 @@ func (self *_parser) parseObjectProperty() ast.Property {
 		parameterList := self.parseFunctionParameterList()
 
 		node := &ast.FunctionLiteral{
+			Name: &ast.Identifier{
+				Name: value,
+			},
 			Function:      idx,
 			ParameterList: parameterList,
 		}
