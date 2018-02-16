@@ -12,7 +12,7 @@ const prgMagic uint32 = 0xFFEEDD00
 var ErrNoCacheFile = errors.New("magic number is not a goja cache file")
 var ErrVersionNotMatching = errors.New("requested version of the cache file is not matching")
 
-type opcode int
+type opcode uint8
 
 const (
 	op_add              opcode = iota
@@ -129,86 +129,460 @@ const (
 	opTry
 )
 
-func instruction2Opcode(ins instruction) (opcode, error) {
-	switch ins.(type) {
-	case _add:
-		return op_add, nil
-	case _and:
-		return op_and, nil
-	case _bnot:
-		return op_bnot, nil
-	case _boxThis:
-		return op_boxThis, nil
-	case _dec:
-		return op_dec, nil
-	case _deleteElem:
-		return op_deleteElem, nil
-	case _deleteElemStrict:
-		return op_deleteElemStrict, nil
-	case _div:
-		return op_div, nil
-	case _dup:
-		return op_dup, nil
-	case _enterWith:
-		return op_enterWith, nil
-	case _enumGet:
-		return op_enumGet, nil
-	case _enumPop:
-		return op_enumPop, nil
-	case _enumerate:
-		return op_enumerate, nil
-	case _getElem:
-		return op_getElem, nil
-	case _getElemCallee:
-		return op_getElemCallee, nil
-	case _getValue:
-		return op_getValue, nil
-	case _halt:
-		return op_halt, nil
-	case _inc:
-		return op_inc, nil
-	case _leaveWith:
-		return op_leaveWith, nil
-	case _loadCallee:
-		return op_loadCallee, nil
-	case _loadGlobalObject:
-		return op_loadGlobalObject, nil
-	case _loadNil:
-		return op_loadNil, nil
-	case _loadUndef:
-		return op_loadUndef, nil
-	case _mod:
-		return op_mod, nil
-	case _mul:
-		return op_mul, nil
-	case _neg:
-		return op_neg, nil
-	case _new:
-		return op_new, nil
-	case _newObject:
-		return op_newObject, nil
-	case _newStash:
-		return op_newStash, nil
-	case _noop:
-		return op_noop, nil
-	case _not:
-		return op_not, nil
-	case _op_eq:
-		return op_op_eq, nil
-	case _op_gt:
-		return op_op_gt, nil
-	case _op_gte:
-		return op_op_gte, nil
-	case _op_in:
-		return op_op_in, nil
-	case _op_instanceof:
-		return op_op_instanceof, nil
-	}
-	panic("illegal opcode found in bytecode")
+func (_newStash) opcode() opcode {
+	return op_newStash
+}
+
+func (_noop) opcode() opcode {
+	return op_noop
+}
+
+func (loadVal) opcode() opcode {
+	return opLoadVal
+}
+
+func (*loadVal1) opcode() opcode {
+	return opLoadVal1
+}
+
+func (_loadUndef) opcode() opcode {
+	return op_loadUndef
+}
+
+func (_loadNil) opcode() opcode {
+	return op_loadNil
+}
+
+func (_loadGlobalObject) opcode() opcode {
+	return op_loadGlobalObject
+}
+
+func (loadStack) opcode() opcode {
+	return opLoadStack
+}
+
+func (_loadCallee) opcode() opcode {
+	return op_loadCallee
+}
+
+func (storeStack) opcode() opcode {
+	return opStoreStack
+}
+
+func (storeStackP) opcode() opcode {
+	return opStoreStackP
+}
+
+func (_toNumber) opcode() opcode {
+	return op_toNumber
+}
+
+func (_add) opcode() opcode {
+	return op_add
+}
+
+func (_sub) opcode() opcode {
+	return op_sub
+}
+
+func (_mul) opcode() opcode {
+	return op_mul
+}
+
+func (_div) opcode() opcode {
+	return op_div
+}
+
+func (_mod) opcode() opcode {
+	return op_mod
+}
+
+func (_neg) opcode() opcode {
+	return op_neg
+}
+
+func (_plus) opcode() opcode {
+	return op_plus
+}
+
+func (_inc) opcode() opcode {
+	return op_inc
+}
+
+func (_dec) opcode() opcode {
+	return op_dec
+}
+
+func (_and) opcode() opcode {
+	return op_and
+}
+
+func (_or) opcode() opcode {
+	return op_or
+}
+
+func (_xor) opcode() opcode {
+	return op_xor
+}
+
+func (_bnot) opcode() opcode {
+	return op_bnot
+}
+
+func (_sal) opcode() opcode {
+	return op_sal
+}
+
+func (_sar) opcode() opcode {
+	return op_sar
+}
+
+func (_shr) opcode() opcode {
+	return op_shr
+}
+
+func (_halt) opcode() opcode {
+	return op_halt
+}
+
+func (jump) opcode() opcode {
+	return opJump
+}
+
+func (_setElem) opcode() opcode {
+	return op_setElem
+}
+
+func (_setElemStrict) opcode() opcode {
+	return op_setElemStrict
+}
+
+func (_deleteElem) opcode() opcode {
+	return op_deleteElem
+}
+
+func (_deleteElemStrict) opcode() opcode {
+	return op_deleteElemStrict
+}
+
+func (deleteProp) opcode() opcode {
+	return opDeleteProp
+}
+
+func (deletePropStrict) opcode() opcode {
+	return opDeletePropStrict
+}
+
+func (setProp) opcode() opcode {
+	return opSetProp
+}
+
+func (setPropStrict) opcode() opcode {
+	return opSetPropStrict
+}
+
+func (setProp1) opcode() opcode {
+	return opSetProp1
+}
+
+func (_setProto) opcode() opcode {
+	return op_setProto
+}
+
+func (setPropGetter) opcode() opcode {
+	return opSetPropGetter
+}
+
+func (setPropSetter) opcode() opcode {
+	return opSetPropSetter
+}
+
+func (getProp) opcode() opcode {
+	return opGetProp
+}
+
+func (getPropCallee) opcode() opcode {
+	return opGetPropCallee
+}
+
+func (_getElem) opcode() opcode {
+	return op_getElem
+}
+
+func (_getElemCallee) opcode() opcode {
+	return op_getElemCallee
+}
+
+func (_dup) opcode() opcode {
+	return op_dup
+}
+
+func (dupN) opcode() opcode {
+	return opDupN
+}
+
+func (rdupN) opcode() opcode {
+	return opRdupN
+}
+
+func (_newObject) opcode() opcode {
+	return op_newObject
+}
+
+func (newArray) opcode() opcode {
+	return opNewArray
+}
+
+func (*newRegexp) opcode() opcode {
+	return opNewRegexp
+}
+
+func (setLocal) opcode() opcode {
+	return opSetLocal
+}
+
+func (setLocalP) opcode() opcode {
+	return opSetLocalP
+}
+
+func (setVar) opcode() opcode {
+	return opSetVar
+}
+
+func (resolveVar1) opcode() opcode {
+	return opResolveVar1
+}
+
+func (deleteVar) opcode() opcode {
+	return opDeleteVar
+}
+
+func (deleteGlobal) opcode() opcode {
+	return opDeleteGlobal
+}
+
+func (resolveVar1Strict) opcode() opcode {
+	return opResolveVar1Strict
+}
+
+func (setGlobal) opcode() opcode {
+	return opSetGlobal
+}
+
+func (setVarStrict) opcode() opcode {
+	return opSetVarStrict
+}
+
+func (setVar1Strict) opcode() opcode {
+	return opSetVar1Strict
+}
+
+func (setGlobalStrict) opcode() opcode {
+	return opSetGlobalStrict
+}
+
+func (getLocal) opcode() opcode {
+	return opGetLocal
+}
+
+func (getVar) opcode() opcode {
+	return opGetVar
+}
+
+func (resolveVar) opcode() opcode {
+	return opResolveVar
+}
+
+func (_getValue) opcode() opcode {
+	return op_getValue
+}
+
+func (_putValue) opcode() opcode {
+	return op_putValue
+}
+
+func (getVar1) opcode() opcode {
+	return opGetVar1
+}
+
+func (getVar1Callee) opcode() opcode {
+	return opGetVar1Callee
+}
+
+func (_pop) opcode() opcode {
+	return op_pop
+}
+
+func (_swap) opcode() opcode {
+	return op_swap
+}
+
+func (callEval) opcode() opcode {
+	return opCallEval
+}
+
+func (callEvalStrict) opcode() opcode {
+	return opCallEvalStrict
+}
+
+func (_boxThis) opcode() opcode {
+	return op_boxThis
+}
+
+func (call) opcode() opcode {
+	return opCall
+}
+
+func (enterFunc) opcode() opcode {
+	return opEnterFunc
+}
+
+func (_ret) opcode() opcode {
+	return op_ret
+}
+
+func (enterFuncStashless) opcode() opcode {
+	return opEnterFuncStashless
+}
+
+func (_retStashless) opcode() opcode {
+	return op_retStashless
+}
+
+func (*newFunc) opcode() opcode {
+	return opNewFunc
+}
+
+func (bindName) opcode() opcode {
+	return opBindName
+}
+
+func (jne) opcode() opcode {
+	return opJne
+}
+
+func (jeq) opcode() opcode {
+	return opJeq
+}
+
+func (jeq1) opcode() opcode {
+	return opJeq1
+}
+
+func (jneq1) opcode() opcode {
+	return opJneq1
+}
+
+func (_not) opcode() opcode {
+	return op_not
+}
+
+func (_op_lt) opcode() opcode {
+	return op_op_lt
+}
+
+func (_op_lte) opcode() opcode {
+	return op_op_lte
+}
+
+func (_op_gt) opcode() opcode {
+	return op_op_gt
+}
+
+func (_op_gte) opcode() opcode {
+	return op_op_gte
+}
+
+func (_op_eq) opcode() opcode {
+	return op_op_eq
+}
+
+func (_op_neq) opcode() opcode {
+	return op_op_neq
+}
+
+func (_op_strict_eq) opcode() opcode {
+	return op_op_strict_eq
+}
+
+func (_op_strict_neq) opcode() opcode {
+	return op_op_strict_neq
+}
+
+func (_op_instanceof) opcode() opcode {
+	return op_op_instanceof
+}
+
+func (_op_in) opcode() opcode {
+	return op_op_in
+}
+
+func (t try) opcode() opcode {
+	return opTry
+}
+
+func (_retFinally) opcode() opcode {
+	return op_retFinally
+}
+
+func (enterCatch) opcode() opcode {
+	return opEnterCatch
+}
+
+func (_throw) opcode() opcode {
+	return op_throw
+}
+
+func (_new) opcode() opcode {
+	return op_new
+}
+
+func (_typeof) opcode() opcode {
+	return op_typeof
+}
+
+func (createArgs) opcode() opcode {
+	return opCreateArgs
+}
+
+func (createArgsStrict) opcode() opcode {
+	return opCreateArgsStrict
+}
+
+func (_enterWith) opcode() opcode {
+	return op_enterWith
+}
+
+func (_leaveWith) opcode() opcode {
+	return op_leaveWith
+}
+
+func (_enumerate) opcode() opcode {
+	return op_enumerate
+}
+
+func (enumNext) opcode() opcode {
+	return opEnumNext
+}
+
+func (_enumGet) opcode() opcode {
+	return op_enumGet
+}
+
+func (_enumPop) opcode() opcode {
+	return op_enumPop
 }
 
 type progReader struct {
 	io.Reader
+}
+
+func (r *progReader) readUint8() (uint8, error) {
+	var val uint8
+	if err := binary.Read(r, binary.BigEndian, &val); err != nil {
+		return 0, err
+	}
+	return val, nil
 }
 
 func (r *progReader) readUint16() (uint16, error) {
@@ -257,6 +631,10 @@ func (r *progReader) readIntArray() ([]int, error) {
 
 type progWriter struct {
 	io.Writer
+}
+
+func (w *progWriter) writeUint8(val uint8) error {
+	return binary.Write(w, binary.BigEndian, val)
 }
 
 func (w *progWriter) writeUint16(val uint16) error {
@@ -320,6 +698,17 @@ func ExportProgram(prg *Program, version uint16) ([]byte, error) {
 		return nil, err
 	}
 
+	length := len(prg.code)
+	if err := writer.writeUint32(uint32(length)); err != nil {
+		return nil, err
+	}
+
+	for _, ins := range prg.code {
+		if err := writer.writeUint8(uint8(ins.opcode())); err != nil {
+			return nil, err
+		}
+	}
+
 	//fmt.Println(buffer.Bytes())
 
 	return buffer.Bytes(), nil
@@ -381,6 +770,20 @@ func ReadProgram(r io.Reader, version uint16) (*Program, error) {
 		return nil, err
 	}
 	prg.src.lineOffsets = lineOffsets
+
+	length, err := reader.readUint32()
+	if err != nil {
+		return nil, err
+	}
+	prg.code = make([]instruction, length)
+
+	for i := 0; i < int(length); i++ {
+		// TODO deserialize actual instruction
+		_, err := reader.readUint8()
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return prg, nil
 }

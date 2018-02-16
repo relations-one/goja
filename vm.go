@@ -119,6 +119,7 @@ type vm struct {
 
 type instruction interface {
 	exec(*vm)
+	opcode() opcode
 }
 
 func intToValue(i int64) Value {
