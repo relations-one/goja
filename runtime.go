@@ -145,7 +145,7 @@ func (f *StackFrame) Write(b *bytes.Buffer) {
 	if f.prg != nil {
 		if n := f.prg.funcName; n != "" {
 			b.WriteString(n)
-			b.WriteString(" ")
+			b.WriteString(" (")
 		}
 		if n := f.prg.src.name; n != "" {
 			b.WriteString(n)
@@ -157,6 +157,9 @@ func (f *StackFrame) Write(b *bytes.Buffer) {
 		b.WriteByte('(')
 		b.WriteString(strconv.Itoa(f.pc))
 		b.WriteByte(')')
+		if f.prg.funcName != "" {
+			b.WriteByte(')')
+		}
 	} else {
 		if f.funcName != "" {
 			b.WriteString(f.funcName)
