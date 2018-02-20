@@ -1001,9 +1001,6 @@ func (r *Runtime) ToValue(i interface{}) Value {
 	case func(ConstructorCall) *Object:
 		name := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 		return r.newNativeConstructor(i, name, 0)
-	case func([]Value) *Object:
-		name := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
-		return r.newNativeFunc(nil, i, name, nil, 0)
 	case *Proxy:
 		proxy := i.proxy
 		if proxy.runtime != r {
@@ -1142,6 +1139,32 @@ func (r *Runtime) ToValue(i interface{}) Value {
 	obj.self = o
 	o.init()
 	return obj
+}
+
+func (r *Runtime) MakeNamedNativeFunctionValue(name string, i interface{}) Value {
+	switch i := i.(type) {
+	case func(FunctionCall) Value:
+		return r.newNativeFunc(i, nil, name, nil, 0)
+	case func(ConstructorCall) *Object:
+		return r.newNativeConstructor(i, name, 0)
+	}
+
+	origValue := reflect.ValueOf(i)
+	value := origValue
+	for value.Kind() == reflect.Ptr {
+		value = reflect.Indirect(value)
+	}
+
+	if !value.IsValid() {
+		return _null
+	}
+
+	switch value.Kind() {
+	case reflect.Func:
+		return r.newNativeFunc(r.wrapReflectFunc(value), nil, name, nil, value.Type().NumIn())
+	}
+
+	return r.NewTypeError("not a function value")
 }
 
 func (r *Runtime) wrapReflectFunc(value reflect.Value) func(FunctionCall) Value {
