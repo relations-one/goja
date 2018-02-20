@@ -246,9 +246,6 @@ func (self *_parser) parseObjectProperty() ast.Property {
 		parameterList := self.parseFunctionParameterList()
 
 		node := &ast.FunctionLiteral{
-			Name: &ast.Identifier{
-				Name: value,
-			},
 			Function:      idx,
 			ParameterList: parameterList,
 		}
