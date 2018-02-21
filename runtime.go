@@ -1141,7 +1141,7 @@ func (r *Runtime) ToValue(i interface{}) Value {
 	return obj
 }
 
-func (r *Runtime) MakeNamedNativeFunctionValue(name string, i interface{}) Value {
+func (r *Runtime) NewNamedNativeFunction(name string, i interface{}) Value {
 	switch i := i.(type) {
 	case func(FunctionCall) Value:
 		return r.newNativeFunc(i, nil, name, nil, 0)
