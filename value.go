@@ -725,6 +725,11 @@ func (o *Object) Keys() (keys []string) {
 	return
 }
 
+func (o *Object) PropertyDescriptor(name string) PropertyDescriptor {
+	desc := o.self.getOwnPropertyDescriptor(name)
+	return o.runtime.toPropertyDescriptor(desc)
+}
+
 // DefineDataProperty is a Go equivalent of Object.defineProperty(o, name, {value: value, writable: writable,
 // configurable: configurable, enumerable: enumerable})
 func (o *Object) DefineDataProperty(name string, value Value, writable, configurable, enumerable Flag) error {
