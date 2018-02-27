@@ -5,7 +5,6 @@ import (
 	"github.com/go-sourcemap/sourcemap"
 	"sort"
 	"strings"
-	"github.com/go-sourcemap/sourcemap"
 )
 
 type Position struct {
