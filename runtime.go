@@ -1309,6 +1309,9 @@ func (r *Runtime) toReflectValue(v Value, typ reflect.Type) (reflect.Value, erro
 	}
 
 	if typ.Implements(typeValue) {
+		if typ.Kind() != reflect.Ptr {
+			return reflect.ValueOf(&v).Elem(), nil
+		}
 		return reflect.ValueOf(v), nil
 	}
 
