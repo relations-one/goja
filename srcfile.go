@@ -2,6 +2,7 @@ package goja
 
 import (
 	"fmt"
+	"github.com/go-sourcemap/sourcemap"
 	"sort"
 	"strings"
 	"github.com/go-sourcemap/sourcemap"
