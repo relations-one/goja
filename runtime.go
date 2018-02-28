@@ -1073,6 +1073,8 @@ func (r *Runtime) ToValue(i interface{}) Value {
 		obj.self = a
 		a.init()
 		return obj
+	case []Value:
+		return r.newArrayValues(i)
 	}
 
 	origValue := reflect.ValueOf(i)
