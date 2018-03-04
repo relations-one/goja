@@ -7,6 +7,24 @@ type lazyObject struct {
 	create func(*Object) objectImpl
 }
 
+func (o *lazyObject) getHiddenProp(name string) Value {
+	obj := o.create(o.val)
+	o.val.self = obj
+	return obj.getHiddenProp(name)
+}
+
+func (o *lazyObject) putHiddenProp(name string, val Value, throw bool) {
+	obj := o.create(o.val)
+	o.val.self = obj
+	obj.putHiddenProp(name, val, throw)
+}
+
+func (o *lazyObject) deleteHiddenProp(name string) error {
+	obj := o.create(o.val)
+	o.val.self = obj
+	return obj.deleteHiddenProp(name)
+}
+
 func (o *lazyObject) className() string {
 	obj := o.create(o.val)
 	o.val.self = obj

@@ -1,6 +1,10 @@
 package goja
 
-import "reflect"
+import (
+	"reflect"
+	"fmt"
+	"errors"
+)
 
 const (
 	classObject   = "Object"
@@ -86,6 +90,9 @@ type objectImpl interface {
 	exportType() reflect.Type
 	equal(objectImpl) bool
 	getOwnPropertyDescriptor(name string) Value
+	getHiddenProp(string) Value
+	putHiddenProp(string, Value, bool)
+	deleteHiddenProp(string) error
 }
 
 type baseObject struct {
@@ -96,6 +103,7 @@ type baseObject struct {
 
 	values    map[string]Value
 	propNames []string
+	hidden    map[string]valueProperty
 }
 
 type primitiveValueObject struct {
@@ -137,6 +145,7 @@ func (f ConstructorCall) Argument(idx int) Value {
 
 func (o *baseObject) init() {
 	o.values = make(map[string]Value)
+	o.hidden = make(map[string]valueProperty)
 }
 
 func (o *baseObject) className() string {
@@ -191,6 +200,40 @@ func (o *baseObject) getStr(name string) Value {
 func (o *baseObject) get(n Value) Value {
 	return o.getStr(n.String())
 }
+
+func (o *baseObject) getHiddenProp(name string) Value {
+	prop := o.hidden[name]
+	return prop.get(o.val)
+}
+
+func (o *baseObject) putHiddenProp(name string, val Value, throw bool) {
+	if v, exists := o.hidden[name]; exists {
+		if !v.writable {
+			o.val.runtime.typeErrorResult(throw, "Cannot assign write-protected property: %s", name)
+			return
+		}
+		v.set(o.val, val)
+		return
+	}
+	prop := valueProperty{
+		writable: true,
+		configurable: true,
+		enumerable: true,
+		value: val,
+	}
+	o.hidden[name] = prop
+}
+
+func (o *baseObject) deleteHiddenProp(name string) error {
+	if v, exists := o.hidden[name]; exists {
+		if !v.configurable {
+			return errors.New(fmt.Sprintf("Cannot delete non-configurable property: %s", name))
+		}
+		delete(o.hidden, name)
+	}
+	return nil
+}
+
 
 func (o *baseObject) checkDeleteProp(name string, prop *valueProperty, throw bool) bool {
 	if !prop.configurable {

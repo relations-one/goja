@@ -708,6 +708,10 @@ func (o *Object) Get(name string) Value {
 	return o.self.getStr(name)
 }
 
+func (o *Object) GetHidden(name string) Value {
+	return o.self.getHiddenProp(name)
+}
+
 func (o *Object) Keys() (keys []string) {
 	if o.runtime.isProxy(o) {
 		proxy := o.runtime.getProxy(o)
@@ -760,6 +764,16 @@ func (o *Object) Set(name string, value interface{}) error {
 	return tryFunc(func() {
 		o.self.putStr(name, o.runtime.ToValue(value), true)
 	})
+}
+
+func (o *Object) SetHidden(name string, value interface{}) error {
+	return tryFunc(func() {
+		o.self.putHiddenProp(name, o.runtime.ToValue(value), true)
+	})
+}
+
+func (o *Object) DeleteHidden(name string) error {
+	return o.self.deleteHiddenProp(name)
 }
 
 // MarshalJSON returns JSON representation of the Object. It is equivalent to JSON.stringify(o).
